@@ -1,0 +1,15 @@
+{
+        "files.associations": {
+                "bitset": "cpp",
+                "chrono": "cpp",
+                "ranges": "cpp",
+                "variant": "cpp",
+                "array": "cpp",
+                "tuple": "cpp",
+                "iosfwd": "cpp",
+                "random": "cpp",
+                "algorithm": "cpp",
+                "iostream": "cpp"
+        },
+        "C_Cpp.errorSquiggles": "enabled"
+}
