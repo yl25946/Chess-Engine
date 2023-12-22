@@ -22,12 +22,37 @@ public:
      * leftmost bit is topleft square, going side then down
      */
     uint64_t bitboard[12];
-    bool canEnPassant;
-    bool canWhiteKingCastle;
-    bool canWhiteQueenCastle;
-    bool canBlackKingCastle;
-    bool canBlackQueenCastle;
-    uint8_t twoPawnMove;
+
+    /**
+     * from left to right:
+     * whose move it is (0 for white, 1 for black)
+     * can en passant (current move)
+     * can white King Castle
+     * can white queen castle
+     * can black king castle
+     * can black queen castle
+     * and rest of the 10 bits counts the pawn move
+     */
+    uint16_t flags = 0;
+    /**
+     * Counts half moves until stalemate
+     */
+    uint8_t staleMatecount;
+    /**
+     * Counts the number of full moves, increment every time black moves
+     */
+    uint16_t moveCounter;
+
+    /**
+     * Shows the previous move
+     * first 8 bits from the left stores the from, next 8 bit stores the to
+     * squares are counted from white's perspective, where top left is one, and go right and then go down
+     */
+    uint16_t previousMove;
+
+    /**
+     * sets up an initial chessboard
+     */
     Board()
     {
         // don't touch this shit
@@ -43,11 +68,13 @@ public:
         bitboard[9] = bitboard[3] << 56;
         bitboard[10] = bitboard[4] << 56;
         bitboard[11] = bitboard[5] << 56;
-        canEnPassant = false;
-        canWhiteKingCastle = true;
-        canBlackKingCastle = true;
-        canWhiteQueenCastle = true;
-        canBlackQueenCastle = true;
+
+        // default evaluation, don't touch this!!!!!!!!!
+        flags = 15 << 10;
+    }
+
+    Board(std::string FEN)
+    {
     }
 
     bool isValidBoardState(bool whiteMove)
@@ -86,5 +113,9 @@ public:
 
             // king
         }
+    }
+
+    std::string toFEN()
+    {
     }
 };
