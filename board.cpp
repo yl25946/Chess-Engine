@@ -33,11 +33,19 @@ public:
      * can black queen castle
      * and rest of the 10 bits counts the pawn move
      */
-    uint16_t flags = 0;
+    bool canEnPassant;
+    // oif we can en passant, this is the square of the en-passantable pawn
+    uint8_t enPassantPawnMove;
+    bool canWhiteKingCastle;
+    bool canWhiteQueenCastle;
+    bool canBlackKingCastle;
+    bool canBlackQueenCastle;
+    bool whiteMove;
+
     /**
      * Counts half moves until stalemate
      */
-    uint8_t staleMatecount;
+    uint8_t staleMateCount;
     /**
      * Counts the number of full moves, increment every time black moves
      */
@@ -69,8 +77,37 @@ public:
         bitboard[10] = bitboard[4] << 56;
         bitboard[11] = bitboard[5] << 56;
 
-        // default evaluation, don't touch this!!!!!!!!!
-        flags = 15 << 10;
+        // // default evaluation, don't touch this!!!!!!!!!
+        // flags = 15 << 10;
+
+        // default board state
+        canEnPassant = false;
+        canWhiteKingCastle = true;
+        canWhiteQueenCastle = true;
+        canBlackKingCastle = true;
+        canBlackQueenCastle = true;
+        whiteMove = true;
+
+        // sets the move counters
+        moveCounter = 0;
+        staleMateCount = 0;
+    }
+
+    /**
+     * sets up an initial chessboard
+     */
+    Board(uint64_t bitboard[], bool whiteMove, bool canEnPassant, uint8_t enPassantPawnMove, bool canWhiteKingCastle, bool canWhiteQueenCastle, bool canBlackKingCastle, bool canBlackQueenCastle)
+    {
+        // copies over the other bitboard
+        for (int i = 0; i < 8; ++i)
+            this->bitboard[i] = bitboard[i];
+
+        this->whiteMove = whiteMove;
+        this->canEnPassant = canEnPassant;
+        this->enPassantPawnMove = enPassantPawnMove;
+        this->canWhiteKingCastle = canWhiteKingCastle;
+        this->canWhiteQueenCastle = canWhiteQueenCastle;
+        this->enPassantPawnMove = enPassantPawnMove;
     }
 
     Board(std::string FEN)
@@ -117,5 +154,7 @@ public:
 
     std::string toFEN()
     {
-    }
+        char board[8][8];
+        // white pawn
+        }
 };
