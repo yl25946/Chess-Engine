@@ -12,7 +12,13 @@
                 "iostream": "cpp",
                 "compare": "cpp",
                 "cstdint": "cpp",
-                "format": "cpp"
+                "format": "cpp",
+                "string_view": "cpp",
+                "regex": "cpp",
+                "initializer_list": "cpp",
+                "span": "cpp",
+                "stacktrace": "cpp",
+                "source_location": "cpp"
         },
         "C_Cpp.errorSquiggles": "enabled"
 }

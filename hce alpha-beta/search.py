@@ -3,12 +3,17 @@ import copy
 import time as stopwatch
 import pesto_eval as pesto
 
+# counter to measure the performance of the engine
+nodes_evaluated = 0
+
 
 def search(board, turn, time):
     """
     Uses alpha-beta pruning with negamax to find the best move in this position
 
     Uses iterative deepening
+
+    NOTE: will fuck up the original board, please make a copy
 
     TODO: If searching with depth <= 1, errors out
     TODO: find a way to not return None when time is too short
@@ -27,6 +32,10 @@ def search(board, turn, time):
     depthCounter = 1
     end_time = stopwatch.time() + time
     last_completed_search = None
+    # resets the counter
+    global nodes_evaluated
+    nodes_evaluated = 0
+    board 
 
     # implements iterative deepening
     try:
@@ -36,7 +45,9 @@ def search(board, turn, time):
             depthCounter += 1
     # time is up
     except Exception as e:
+        # print(e)
         print("Searched Depth(half-moves): " + str(depthCounter - 1))
+        print("Searched " + str(nodes_evaluated / time) + " nodes per second")
         return last_completed_search
 
 
@@ -64,6 +75,10 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
     # check if time is up, then throw an exception
     if (stopwatch.time() >= end_time):
         raise Exception("Out of time!")
+    
+    # we've starting to evaluate a node, increment the counter
+    global nodes_evaluated
+    nodes_evaluated += 1
 
     # if we ever check for a move here we're FUCKED
 
@@ -83,7 +98,7 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
     if (depth == 0):
         # print(board.fen())
         # print(pesto.eval(board, turn))
-        return None, pesto.eval(board, turn)
+        return None, quiesce_search(board, turn, alpha, beta, end_time)
 
     # start the search
     legal_moves = board.legal_moves
@@ -93,12 +108,11 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
     # TODO: ADD GOOD MOVE ORDERING
     # curr_move is the current move we are searching
     for curr_move in legal_moves:
-        # make a copy of the board and search it
-        board_copy = copy.deepcopy(board)
-        board_copy.push(curr_move)
+        board.push(curr_move)
         # turn ^ 1 flips the turn
         search_result = alpha_beta_negamax_search(
-            board_copy, turn ^ 1, depth - 1, -beta, -alpha, end_time)
+            board, turn ^ 1, depth - 1, -beta, -alpha, end_time)
+        board.pop()
         eval = - search_result[1]
         if (eval >= beta):
             # uh if it does this on the first move we're kinda fucked
@@ -108,9 +122,53 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
             # alpha acts like max in MiniMax
             alpha = eval
             best_move = curr_move
-
     return best_move, alpha
 
+def quiesce_search(board, turn, alpha, beta, end_time):
+    """
+    Performes a Quiescent Search to make sure we aren't throwing the move
+    
+    Parameters:
+    board (chess.Board): the board position you want to perform the search on
+    alpha (int): worst you could do
+    beta (int): the best your opponent could do
+    end_time (long): time we want to finish calculations by
+
+    return
+    int: evaulation of the position in centripawns
+    """
+
+    # check if time is up, then throw an exception
+    if (stopwatch.time() >= end_time):
+        raise Exception("Out of time!")
+
+    # increments the node searched
+    global nodes_evaluated
+    nodes_evaluated += 1
+
+    # fail soft
+    stand_pat = pesto.eval(board, turn)
+    if(stand_pat >= beta):
+        return beta
+    if(alpha < stand_pat):
+        alpha = stand_pat
+    
+    capture_moves = [move for move in board.legal_moves if board.is_capture(move)]
+
+    for move in capture_moves:
+        # if there aren't any captures
+        if(move == None): continue
+        board.push(move)
+        # turn ^ 1 switches the turn to the other side
+        score = - quiesce_search(board, turn ^ 1, -beta, -alpha, end_time)
+        board.pop()
+
+        if(score >= beta):
+            return beta
+        if(score > alpha):
+            alpha = score
+    
+    return alpha
 
 # def negamax(board, turn, depth, end_time):
 #     """
@@ -179,9 +237,9 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
 #     return best_move, best_eval
 
 
-pesto.init_tables()
-board = chess.Board()
-board.set_fen(
-    "3qr1k1/p5pp/2pb1n2/p2p4/P7/1PNP3P/3Q1PP1/2B1R1K1 b - - 0 21")
-print(board)
-print(search(board, chess.BLACK, 15600))
+# pesto.init_tables()
+# board = chess.Board()
+# board.set_fen(
+#     "3qr1k1/p5pp/2pb1n2/p2p4/P7/1PNP3P/3Q1PP1/2B1R1K1 b - - 0 21")
+# print(board)
+# print(search(board, chess.BLACK, 30))

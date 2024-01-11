@@ -1,4 +1,5 @@
 import chess
+import copy
 import search
 import pesto_eval as pesto
 
@@ -80,10 +81,13 @@ print(board)
 if (engine_color == chess.WHITE):
     # we will move in a two move cycle
     while (not check_end_game(board, chess.WHITE)):
+        # searching fucks up the original board, make a copy to push the move
+        board_copy = copy.deepcopy(board)
         # computer searching
         search_result = search.search(board, engine_color, time)
         # play the move
-        board.push(search_result[0])
+        board_copy.push(search_result[0])
+        board = board_copy
 
         # updates the board
         print(board)
@@ -104,10 +108,12 @@ if (engine_color == chess.WHITE):
                 board.push_uci(player_move)
                 move_played = True
             except:
-                player_move = print("Invalid move, please enter another one: ")
+                player_move = input("Invalid move, please enter another one: ")
 
         # updates the board
         print(board)
+        # the move stack is preserved
+        print(board.move_stack)
 # engine plays as black
 else:
     # we will move in a two move cycle
@@ -120,7 +126,7 @@ else:
                 board.push_uci(player_move)
                 move_played = True
             except:
-                player_move = print("Invalid move, please enter another one: ")
+                player_move = input("Invalid move, please enter another one: ")
 
         # update the board
         print(board)
@@ -130,9 +136,12 @@ else:
             break
 
         # computer searching
+        # searching fucks up the original board, make a copy to push the move
+        board_copy = copy.deepcopy(board)
         search_result = search.search(board, engine_color, time)
         # play the move
-        board.push(search_result[0])
+        board_copy.push(search_result[0])
+        board = board_copy
         print(board)
 
         # prints the estimated evaluation

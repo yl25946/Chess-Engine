@@ -1,27 +1,33 @@
-#include <string>
+// #include <string>
 
-#include "move.h"
+// #include "move.h"
+#include "board.h"
+
+/** Uses PeSTO's labeling scheme */
+std::array<char, 12> numToPiece = {'P', 'p', 'N', 'n', 'B', 'b', 'R', 'r', 'Q', 'q', 'K', 'k'};
+
+// const uint8_t bitboardSize = 12;
 
 class Board
 {
 public:
     /**
      * 0: white pawn
-     * 1: white rook
+     * 1: black pawn
      * 2: white knight
-     * 3: white bishop
-     * 4: white queen
-     * 5: white king
-     * 6: black pawn
+     * 3: black knight
+     * 4: white bishop
+     * 5: black bishop
+     * 6: white rook
      * 7: black rook
-     * 8: black knight
-     * 9: black bishop
-     * 10: black queen
+     * 8: white queen
+     * 9: black queen
+     * 10: white king
      * 11: black king
      *
-     * leftmost bit is topleft square, going side then down
+     * rigthmost bit is a0
      */
-    uint64_t bitboard[12];
+    std::array<uint64_t, 12> bitboard;
 
     /**
      * from left to right:
@@ -33,128 +39,161 @@ public:
      * can black queen castle
      * and rest of the 10 bits counts the pawn move
      */
-    bool canEnPassant;
-    // oif we can en passant, this is the square of the en-passantable pawn
-    uint8_t enPassantPawnMove;
-    bool canWhiteKingCastle;
-    bool canWhiteQueenCastle;
-    bool canBlackKingCastle;
-    bool canBlackQueenCastle;
-    bool whiteMove;
 
-    /**
-     * Counts half moves until stalemate
-     */
-    uint8_t staleMateCount;
     /**
      * Counts the number of full moves, increment every time black moves
      */
     uint16_t moveCounter;
 
     /**
-     * Shows the previous move
-     * first 8 bits from the left stores the from, next 8 bit stores the to
-     * squares are counted from white's perspective, where top left is one, and go right and then go down
+     * Counts the number of half moves elapsed after the last capture, draw a 100
      */
-    uint16_t previousMove;
+    uint8_t halfMoveCounter;
+
+    /**
+     * square where en-passant can happen, all 1s if otherwise
+     */
+    uint8_t enPassant;
+
+    /**
+     * leftmost bit represents who's move it is (0 if white, 1 if black)
+     * right 4 bits represent castling rights (1 if true, 0 if false)
+     * going from right to left it is white king, white queen, black king, black queen castling rights
+     * qkQK
+     * 0000
+     */
+    uint8_t moveAndCastle;
 
     /**
      * sets up an initial chessboard
      */
     Board()
     {
-        // don't touch this shit
-        bitboard[0] = 65280;
-        bitboard[1] = 129;
+        // don't touch this shit, I already set it up
+        bitboard[0] = (uint64_t(255)) << 8;
+        bitboard[1] = (uint64_t(255)) << 48;
         bitboard[2] = 66;
-        bitboard[3] = 36;
-        bitboard[4] = 16;
-        bitboard[5] = 8;
-        bitboard[6] = 255 << 48;
-        bitboard[7] = bitboard[1] << 56;
-        bitboard[8] = bitboard[2] << 56;
-        bitboard[9] = bitboard[3] << 56;
-        bitboard[10] = bitboard[4] << 56;
-        bitboard[11] = bitboard[5] << 56;
+        bitboard[3] = bitboard[2] << 56;
+        bitboard[4] = 36;
+        bitboard[5] = bitboard[4] << 56;
+        bitboard[6] = 129;
+        bitboard[7] = bitboard[6] << 56;
+        bitboard[8] = 8;
+        bitboard[9] = bitboard[8] << 56;
+        bitboard[10] = 16;
+        bitboard[11] = bitboard[10] << 56;
 
         // // default evaluation, don't touch this!!!!!!!!!
         // flags = 15 << 10;
 
-        // default board state
-        canEnPassant = false;
-        canWhiteKingCastle = true;
-        canWhiteQueenCastle = true;
-        canBlackKingCastle = true;
-        canBlackQueenCastle = true;
-        whiteMove = true;
-
-        // sets the move counters
+        // sets the different flags
         moveCounter = 0;
-        staleMateCount = 0;
+        halfMoveCounter = 0;
+        // no pawn move yet
+        enPassant = UINT8_MAX;
+        // everyone can castle, white move
+        moveAndCastle = 15;
     }
 
     /**
      * sets up an initial chessboard
      */
-    Board(uint64_t bitboard[], bool whiteMove, bool canEnPassant, uint8_t enPassantPawnMove, bool canWhiteKingCastle, bool canWhiteQueenCastle, bool canBlackKingCastle, bool canBlackQueenCastle)
+    // Board deepCopy(Board board)
+    // {
+    //     // copies over the other bitboard
+    //     for (int i = 0; i < 12; ++i)
+    //         this->bitboard[i] = board.bitboard[i];
+    // }
+
+    // Board(std::string FEN)
+    // {
+
+    // }
+
+    /**
+     *
+     */
+    bool canWhiteKingCastle()
     {
-        // copies over the other bitboard
+        return moveAndCastle & 1;
+    }
+
+    bool canWhiteKingCastle()
+    {
+        return moveAndCastle & 1;
+    }
+
+    /**
+     * Returns the fen representation of the board
+     *
+     * @returns string fen representation
+     */
+    std::string fen()
+    {
+        // default square value is '0'
+        std::array<std::array<char, 8>, 8> board;
+
+        // sets all the values to the default value
+        for (int i = 0; i < board.size(); ++i)
+        {
+            for (int j = 0; j < board[0].size(); ++j)
+            {
+                board[i][j] = '0';
+            }
+        }
+
+        // throws everything into the board
+        for (int i = 0; i < bitboard.size(); ++i)
+        {
+            for (int j = 0; j < 64; ++j)
+            {
+                // if there is a piece at the location
+                if (bitboard[i] & (uint64_t(1) << j))
+                {
+                    // when we insert it, flip the board so it is in the correct fen notation
+                    int index = j ^ 56;
+                    board[index / 8][index % 8] = numToPiece[i];
+                }
+            }
+        }
+
+        // convert to usable format
+        std::string fen = "";
         for (int i = 0; i < 8; ++i)
-            this->bitboard[i] = bitboard[i];
-
-        this->whiteMove = whiteMove;
-        this->canEnPassant = canEnPassant;
-        this->enPassantPawnMove = enPassantPawnMove;
-        this->canWhiteKingCastle = canWhiteKingCastle;
-        this->canWhiteQueenCastle = canWhiteQueenCastle;
-        this->enPassantPawnMove = enPassantPawnMove;
-    }
-
-    Board(std::string FEN)
-    {
-    }
-
-    bool isValidBoardState(bool whiteMove)
-    {
-        if (whiteMove)
         {
-            uint64_t kingSquare = bitboard[5];
-            // pawn
-            for (int i = 0; i < 64; ++i)
+            // std::string line = "";
+            uint8_t counter = 0;
+            for (int j = 0; j < 8; ++j)
             {
+                if (board[i][j] == '0')
+                    ++counter;
+                else
+                {
+                    if (counter != 0)
+                        fen += std::to_string(counter);
+                    fen += board[i][j];
+                    counter = 0;
+                }
             }
-            // rook
-
-            // knight
-
-            // bishop
-
-            // queen
-
-            // king
+            // if there are empty pieces after the last piece in the row, add it in
+            if (counter != 0)
+                fen += std::to_string(counter);
+            // we need to build this backwards and add the divider "/"
+            fen += "/";
         }
-        else
-        {
-            uint64_t kingSquare = bitboard[11];
-            // pawn
-            for (int i = 0; i < 64; ++i)
-            {
-            }
-            // rook
 
-            // knight
+        // need to prune the last "/" away
+        fen.pop_back();
 
-            // bishop
-
-            // queen
-
-            // king
-        }
+        return fen;
     }
 
-    std::string toFEN()
-    {
-        char board[8][8];
-        // white pawn
-        }
+    // bool
 };
+
+// int main()
+// {
+//     Board b;
+//     std::cout << b.fen();
+//     return 0;
+// }
