@@ -213,14 +213,15 @@ def init_tables():
     # chess.KING is one greater than PeSTO's
     while (piece < chess.KING):
         for square in range(64):
+            # flip white because python-chess a1 = 0, but PeSTO a8 = 0
             mg_table[piece_color][square] = mg_value[piece] + \
-                mg_pesto_table[piece][square]
-            eg_table[piece_color][square] = eg_value[piece] + \
+                mg_pesto_table[piece][flip(square)]
+            eg_table[piece_color][flip(square)] = eg_value[piece] + \
                 eg_pesto_table[piece][square]
             mg_table[piece_color + 1][square] = mg_value[piece] + \
-                mg_pesto_table[piece][flip(square)]
+                mg_pesto_table[piece][square]
             eg_table[piece_color + 1][square] = eg_value[piece] + \
-                eg_pesto_table[piece][flip(square)]
+                eg_pesto_table[piece][square]
         # increment the counters, outside the for loop
         piece_color += 2
         piece += 1
@@ -270,7 +271,7 @@ def eval(board, side2move):
     return ((mgScore * mgPhase) + (egScore * egPhase))//24
 
 
-init_tables()
-board = chess.Board()
-board.set_fen("rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")
-print(eval(board, chess.BLACK))
+# init_tables()
+# board = chess.Board()
+# board.set_fen("rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")
+# print(eval(board, chess.BLACK))

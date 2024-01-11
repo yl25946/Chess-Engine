@@ -182,6 +182,6 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
 pesto.init_tables()
 board = chess.Board()
 board.set_fen(
-    "r1bqk2r/pppp1p1p/3bpn2/6p1/1n2P3/2N3Q1/PPPP1PPP/1RB1KBNR w Kkq - 2 7")
+    "3qr1k1/p5pp/2pb1n2/p2p4/P7/1PNP3P/3Q1PP1/2B1R1K1 b - - 0 21")
 print(board)
-print(search(board, chess.WHITE, 120))
+print(search(board, chess.BLACK, 15600))
