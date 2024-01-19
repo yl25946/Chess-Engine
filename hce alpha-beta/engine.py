@@ -113,7 +113,7 @@ if (engine_color == chess.WHITE):
         # updates the board
         print(board)
         # the move stack is preserved
-        print(board.move_stack)
+        # print(board.move_stack)
 # engine plays as black
 else:
     # we will move in a two move cycle

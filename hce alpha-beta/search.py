@@ -35,13 +35,16 @@ def search(board, turn, time):
     # resets the counter
     global nodes_evaluated
     nodes_evaluated = 0
-    board 
+    board
 
     # implements iterative deepening
     try:
         while (True):
             last_completed_search = alpha_beta_negamax_search(
                 board, turn, depthCounter, -100000, 100000, end_time)
+            # if checkmate, then just play it, why the fuck are we searching more
+            if (last_completed_search[1] == 10000):
+                return last_completed_search
             depthCounter += 1
     # time is up
     except Exception as e:
@@ -75,23 +78,12 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
     # check if time is up, then throw an exception
     if (stopwatch.time() >= end_time):
         raise Exception("Out of time!")
-    
+
     # we've starting to evaluate a node, increment the counter
     global nodes_evaluated
     nodes_evaluated += 1
 
     # if we ever check for a move here we're FUCKED
-
-    # checking end-states
-    if (board.is_checkmate()):
-        return None, -10000
-    if (board.is_stalemate()):
-        return None, 0
-    if (board.is_insufficient_material()):
-        return None, 0
-    if (board.is_fifty_moves()):
-        return None, 0
-    # TODO: ADD IN EFFICIENT REPITITION
 
     # return heuristic evaluation if the game hasn't ended
     # TODO: ADD QUIESCE HERE
@@ -124,10 +116,11 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
             best_move = curr_move
     return best_move, alpha
 
+
 def quiesce_search(board, turn, alpha, beta, end_time):
     """
     Performes a Quiescent Search to make sure we aren't throwing the move
-    
+
     Parameters:
     board (chess.Board): the board position you want to perform the search on
     alpha (int): worst you could do
@@ -148,26 +141,28 @@ def quiesce_search(board, turn, alpha, beta, end_time):
 
     # fail soft
     stand_pat = pesto.eval(board, turn)
-    if(stand_pat >= beta):
+    if (stand_pat >= beta):
         return beta
-    if(alpha < stand_pat):
+    if (alpha < stand_pat):
         alpha = stand_pat
-    
-    capture_moves = [move for move in board.legal_moves if board.is_capture(move)]
+
+    capture_moves = [
+        move for move in board.legal_moves if board.is_capture(move)]
 
     for move in capture_moves:
         # if there aren't any captures
-        if(move == None): continue
+        if (move == None):
+            continue
         board.push(move)
         # turn ^ 1 switches the turn to the other side
         score = - quiesce_search(board, turn ^ 1, -beta, -alpha, end_time)
         board.pop()
 
-        if(score >= beta):
+        if (score >= beta):
             return beta
-        if(score > alpha):
+        if (score > alpha):
             alpha = score
-    
+
     return alpha
 
 # def negamax(board, turn, depth, end_time):
@@ -239,7 +234,6 @@ def quiesce_search(board, turn, alpha, beta, end_time):
 
 # pesto.init_tables()
 # board = chess.Board()
-# board.set_fen(
-#     "3qr1k1/p5pp/2pb1n2/p2p4/P7/1PNP3P/3Q1PP1/2B1R1K1 b - - 0 21")
+# board.set_fen("r1b2r1k/p3b1pp/2p4N/2P4P/1PQ1n3/2P5/P1K2P2/RNB4q w - - 4 18")
 # print(board)
-# print(search(board, chess.BLACK, 30))
+# print(search(board, chess.WHITE, 60))

@@ -239,6 +239,17 @@ def eval(board, side2move):
     float: evaluation of the position
     """
 
+    # checking end-states
+    if (board.is_checkmate()):
+        return -10000
+    if (board.is_stalemate()):
+        return 0
+    if (board.is_insufficient_material()):
+        return 0
+    if (board.is_fifty_moves()):
+        return 0
+    # TODO: ADD IN EFFICIENT REPITITION
+
     # convert side2move from python-chess notation to PeSTO notation
     # so what the fuck I don't need this?
     # if something breaks, add it back in
