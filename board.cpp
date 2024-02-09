@@ -1,6 +1,3 @@
-// #include <string>
-
-// #include "move.h"
 #include "board.h"
 
 /** Uses PeSTO's labeling scheme */
@@ -25,20 +22,9 @@ public:
      * 10: white king
      * 11: black king
      *
-     * rigthmost bit is a0
+     * rightmost bit is a0
      */
     std::array<uint64_t, 12> bitboard;
-
-    /**
-     * from left to right:
-     * whose move it is (0 for white, 1 for black)
-     * can en passant (current move)
-     * can white King Castle
-     * can white queen castle
-     * can black king castle
-     * can black queen castle
-     * and rest of the 10 bits counts the pawn move
-     */
 
     /**
      * Counts the number of full moves, increment every time black moves
@@ -56,7 +42,7 @@ public:
     uint8_t enPassant;
 
     /**
-     * leftmost bit represents who's move it is (0 if white, 1 if black)
+     * leftmost bit represents who's move it is (1 if white, 0 if black)
      * right 4 bits represent castling rights (1 if true, 0 if false)
      * going from right to left it is white king, white queen, black king, black queen castling rights
      * qkQK
@@ -92,23 +78,26 @@ public:
         // no pawn move yet
         enPassant = UINT8_MAX;
         // everyone can castle, white move
-        moveAndCastle = 15;
+        moveAndCastle = (1 << 15) + 15;
     }
 
     /**
      * sets up an initial chessboard
      */
-    // Board deepCopy(Board board)
-    // {
-    //     // copies over the other bitboard
-    //     for (int i = 0; i < 12; ++i)
-    //         this->bitboard[i] = board.bitboard[i];
-    // }
+    Board &deepCopy()
+    {
+        Board board;
+        // copies over the other bitboard
+        for (int i = 0; i < 12; ++i)
+            this->bitboard[i] = board.bitboard[i];
 
-    // Board(std::string FEN)
-    // {
+        board.moveCounter = this->moveCounter;
+        board.halfMoveCounter = this->halfMoveCounter;
+        board.moveAndCastle = this->moveAndCastle;
+        board.enPassant = this->enPassant;
 
-    // }
+        return board;
+    }
 
     /**
      *
@@ -118,11 +107,54 @@ public:
         return moveAndCastle & 1;
     }
 
-    bool canWhiteKingCastle()
+    bool canWhiteQueenCastle()
     {
-        return moveAndCastle & 1;
+        return moveAndCastle & 2;
     }
 
+    bool canBlackKingCastle()
+    {
+        return moveAndCastle & 4;
+    }
+
+    bool canBlackQueenCastle()
+    {
+        return moveAndCastle & 8;
+    }
+
+    bool isInCheck()
+    {
+        return false;
+    }
+
+    /**
+     * returns UINT8_MAX if not found, otherwise returns square
+     */
+    uint8_t pieceAt(uint8_t square)
+    {
+        for (uint8_t i = 0; i < bitboard.size(); ++i)
+            if (bitboard[i] & (1 << square))
+                return i;
+
+        return UINT8_MAX;
+    }
+
+    void push(Move m)
+    {
+        if (!isWhiteMove())
+            ++moveCounter;
+
+        uint64_t from = 1 << m.from();
+        uint64_t to = 1 << m.to();
+
+        // swaps it from white to black or black to white move
+        moveAndCastle ^= (1 << 7);
+    }
+
+    bool isWhiteMove()
+    {
+        return moveAndCastle & (1 << 7);
+    }
     /**
      * Returns the fen representation of the board
      *
@@ -187,8 +219,6 @@ public:
 
         return fen;
     }
-
-    // bool
 };
 
 // int main()
