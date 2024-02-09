@@ -1,5 +1,5 @@
-#include <iostream>
-#include <vector>
+// #include <iostream>
+// #include <vector>
 
 #include "moveGen.h"
 #include "board.h"
@@ -11,9 +11,9 @@
 // stores the board state after every move.
 // std::vector<unsigned long long> boardState;
 
-// int main()
-// {
-//     unsigned long long test[10];
-//     // moveGen(test);
-//     return 0;
-// }
+int main()
+{
+    Board board;
+    // Move move(0, 0, 0);
+    return 0;
+}

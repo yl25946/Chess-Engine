@@ -1,17 +1,10 @@
 #include "moveList.h"
 
-class MoveList
+MoveList::MoveList()
 {
-public:
-    std::array<Move, 255> oversizedArray;
-    uint8_t size = 0;
+}
 
-    MoveList()
-    {
-    }
-
-    inline void insert(Move m)
-    {
-        oversizedArray[size++];
-    }
-};
+inline void MoveList::insert(Move m)
+{
+    oversizedArray[size++] = m;
+}
