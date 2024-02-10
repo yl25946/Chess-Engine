@@ -69,9 +69,10 @@ void addPromotionMoves(MoveList list, uint8_t currSquare, uint8_t promotionSquar
  */
 void pawnGen(const Board &board, MoveList list)
 {
-    bool whiteMove = board.isWhiteMove();
     // finds the proper place to get the pawns
-    uint64_t pawnBoard = board.bitboard[board.isWhiteMove() ? 0 : 1];
+    uint8_t pawnBitboardIndex = board.isWhiteMove() ? 0 : 1;
+
+    Board copy = board;
     // if it's black, just rotate the board using byteswap and normally gen pawnMove
 
     // check for en passant
@@ -87,7 +88,7 @@ void pawnGen(const Board &board, MoveList list)
             case 0:
                 // check the right
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + EAST + SOUTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + EAST + SOUTH)))
                     list.insert(Move(captureSquare + EAST + SOUTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 break;
 
@@ -95,7 +96,7 @@ void pawnGen(const Board &board, MoveList list)
             case 7:
                 // check the left
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + WEST + SOUTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + WEST + SOUTH)))
                     list.insert(Move(captureSquare + WEST + SOUTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 break;
 
@@ -103,11 +104,11 @@ void pawnGen(const Board &board, MoveList list)
             default:
                 // check the left
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + WEST + SOUTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + WEST + SOUTH)))
                     list.insert(Move(captureSquare + WEST + SOUTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 // check the right
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + EAST + SOUTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + EAST + SOUTH)))
                     list.insert(Move(captureSquare + EAST + SOUTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 break;
             }
@@ -120,7 +121,7 @@ void pawnGen(const Board &board, MoveList list)
             case 0:
                 // check the right
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + EAST + NORTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + EAST + NORTH)))
                     list.insert(Move(captureSquare + EAST + NORTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 break;
 
@@ -128,7 +129,7 @@ void pawnGen(const Board &board, MoveList list)
             case 7:
                 // check the left
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + WEST + NORTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + WEST + NORTH)))
                     list.insert(Move(captureSquare + WEST + NORTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 break;
 
@@ -136,11 +137,11 @@ void pawnGen(const Board &board, MoveList list)
             default:
                 // check the left
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + WEST + NORTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + WEST + NORTH)))
                     list.insert(Move(captureSquare + WEST + NORTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 // check the right
                 // if there is a pawn here
-                if (pawnBoard & (1 << (captureSquare + EAST + NORTH)))
+                if (copy.bitboard[pawnBitboardIndex] & (1 << (captureSquare + EAST + NORTH)))
                     list.insert(Move(captureSquare + EAST + NORTH, captureSquare, MoveFlag::EN_PASSANT_CAPTURE));
                 break;
             }
@@ -149,107 +150,104 @@ void pawnGen(const Board &board, MoveList list)
 
     // iterate backwards because it would optimize alpha beta
     // start at the 6th rank because its guaranteed that there won't be a pawn on the last rank
-    if (whiteMove)
+    if (board.isWhiteMove())
     {
-        for (uint8_t i = 55; i >= 8; --i)
+        while (copy.bitboard[pawnBitboardIndex])
         {
-            uint8_t fileNum = file(i);
-            uint8_t rankNum = rank(i);
-            // if there isn't a pawn here, continue
-            if ((pawnBoard & 1 << i) == 0)
-                continue;
+            uint8_t square = copy.popBitboard(pawnBitboardIndex);
+            uint8_t fileNum = file(square);
+            uint8_t rankNum = rank(square);
 
             // check promotions
             if (rankNum == 6)
             {
                 // move forward
-                if (!board.isPieceAt(i + NORTH))
+                if (!board.isPieceAt(square + NORTH))
                 {
-                    addPromotionMoves(list, i, i + NORTH, false);
+                    addPromotionMoves(list, square, square + NORTH, false);
                 }
                 // if we can take to the left
                 if ((fileNum != 0) && board.isBlackPieceAt(NORTH + EAST))
                 {
-                    addPromotionMoves(list, i, i + NORTH + EAST, true);
+                    addPromotionMoves(list, square, square + NORTH + EAST, true);
                 }
-                if ((fileNum != 7) && board.isBlackPieceAt(i + NORTH + WEST))
+                if ((fileNum != 7) && board.isBlackPieceAt(square + NORTH + WEST))
                 {
-                    addPromotionMoves(list, i, i + NORTH + WEST, true);
+                    addPromotionMoves(list, square, square + NORTH + WEST, true);
                 }
                 // we got all the possibilities
                 continue;
             }
 
             // pawn capture to the left available
-            if ((fileNum != 0) && board.isPieceAt(i + NORTH + EAST))
-                list.insert(Move(i, i + NORTH + EAST, MoveFlag::CAPTURE));
+            if ((fileNum != 0) && board.isPieceAt(square + NORTH + EAST))
+                list.insert(Move(square, square + NORTH + EAST, MoveFlag::CAPTURE));
 
             // pawn capture to the right
-            if ((fileNum != 7) && board.isBlackPieceAt(i + NORTH + WEST))
-                list.insert(Move(i, i + NORTH + WEST, MoveFlag::CAPTURE));
+            if ((fileNum != 7) && board.isBlackPieceAt(square + NORTH + WEST))
+                list.insert(Move(square, square + NORTH + WEST, MoveFlag::CAPTURE));
 
             // we can double move this
             if (rankNum == 1)
             {
-                if (!board.isPieceAt(i + NORTH) && !board.isPieceAt(i + NORTH + NORTH))
-                    list.insert(Move(i, i + NORTH + NORTH, MoveFlag::DOUBLE_PAWN_PUSH));
+                if (!board.isPieceAt(square + NORTH) && !board.isPieceAt(square + NORTH + NORTH))
+                    list.insert(Move(square, square + NORTH + NORTH, MoveFlag::DOUBLE_PAWN_PUSH));
             }
 
             // just move the pawn forward
-            if (!board.isPieceAt(i + NORTH))
-                list.insert(Move(i, i + NORTH, MoveFlag::QUIET_MOVE));
+            if (!board.isPieceAt(square + NORTH))
+                list.insert(Move(square, square + NORTH, MoveFlag::QUIET_MOVE));
         }
     }
 
     else
     {
-        for (uint8_t i = 8; i <= 55; ++i)
+        while (copy.bitboard[pawnBitboardIndex])
         {
-            uint8_t fileNum = file(i);
-            uint8_t rankNum = rank(i);
+            uint8_t square = copy.popBitboard(pawnBitboardIndex);
+            uint8_t fileNum = file(square);
+            uint8_t rankNum = rank(square);
             // if there isn't a pawn on this square
-            if ((pawnBoard & 1 << i) == 0)
-                continue;
 
             // check promotions
             if (rankNum == 1)
             {
                 // move forward
-                if (!board.isPieceAt(i + SOUTH))
+                if (!board.isPieceAt(square + SOUTH))
                 {
-                    addPromotionMoves(list, i, i + SOUTH, false);
+                    addPromotionMoves(list, square, square + SOUTH, false);
                 }
                 // if we can take to the left
                 if ((fileNum != 0) && board.isBlackPieceAt(SOUTH + EAST))
                 {
-                    addPromotionMoves(list, i, i + SOUTH + EAST, true);
+                    addPromotionMoves(list, square, square + SOUTH + EAST, true);
                 }
-                if ((fileNum != 7) && board.isBlackPieceAt(i + SOUTH + WEST))
+                if ((fileNum != 7) && board.isBlackPieceAt(square + SOUTH + WEST))
                 {
-                    addPromotionMoves(list, i, i + SOUTH + WEST, true);
+                    addPromotionMoves(list, square, square + SOUTH + WEST, true);
                 }
                 // we got all the possibilities
                 continue;
             }
 
             // pawn capture to the left available
-            if ((fileNum != 0) && board.isPieceAt(i + SOUTH + EAST))
-                list.insert(Move(i, i + SOUTH + EAST, MoveFlag::CAPTURE));
+            if ((fileNum != 0) && board.isPieceAt(square + SOUTH + EAST))
+                list.insert(Move(square, square + SOUTH + EAST, MoveFlag::CAPTURE));
 
             // pawn capture to the right
-            if ((fileNum != 7) && board.isBlackPieceAt(i + SOUTH + WEST))
-                list.insert(Move(i, i + SOUTH + WEST, MoveFlag::CAPTURE));
+            if ((fileNum != 7) && board.isBlackPieceAt(square + SOUTH + WEST))
+                list.insert(Move(square, square + SOUTH + WEST, MoveFlag::CAPTURE));
 
             // we can double move this
             if (rankNum == 6)
             {
-                if (!board.isPieceAt(i + SOUTH) && !board.isPieceAt(i + SOUTH + SOUTH))
-                    list.insert(Move(i, i + SOUTH + SOUTH, MoveFlag::DOUBLE_PAWN_PUSH));
+                if (!board.isPieceAt(square + SOUTH) && !board.isPieceAt(square + SOUTH + SOUTH))
+                    list.insert(Move(square, square + SOUTH + SOUTH, MoveFlag::DOUBLE_PAWN_PUSH));
             }
 
             // just move the pawn forward
-            if (!board.isPieceAt(i + SOUTH))
-                list.insert(Move(i, i + SOUTH, MoveFlag::QUIET_MOVE));
+            if (!board.isPieceAt(square + SOUTH))
+                list.insert(Move(square, square + SOUTH, MoveFlag::QUIET_MOVE));
         }
     }
 }
@@ -263,7 +261,10 @@ std::array<int8_t, 8> knightMoves = {NORTH + NORTH + EAST, NORTH + NORTH + WEST,
  */
 void knightGen(Board &board, MoveList list)
 {
-    uint64_t knightBoard = board.bitboard[WHITE_KNIGHT + (board.isWhiteMove() ? 0 : 1)];
+    // index where we can access the correct bitboard
+    uint64_t knightBitboardIndex = 2 + (board.isWhiteMove() ? 0 : 1);
+
+    Board copy = board;
 
     // case for the middle 6x6, the knight can freely move
     // have two for optimization?
@@ -271,28 +272,54 @@ void knightGen(Board &board, MoveList list)
     // iterator for the squares
     if (board.isWhiteMove())
     {
-        for (uint8_t i = 63; i >= 0; --i)
+        while (copy.bitboard[knightBitboardIndex])
         {
-            // guard clause to prevent us from generating phantom moves
-            if ((knightBoard & (1 << i)) == 0)
-                continue;
-
+            uint8_t square = copy.popBitboard(knightBitboardIndex);
             for (int moveType = 0; moveType < 8; ++moveType)
             {
-                if (knightMap[moveType] & (1 << i))
+                // within the bounds
+                if (knightMap[moveType] & (1 << square))
                 {
-                    if (board.isBlackPieceAt(i + knightMoves[moveType]))
+                    if (board.isBlackPieceAt(square + knightMoves[moveType]))
                     {
-                        list.insert(Move(i, i + knightMoves[moveType], MoveFlag::CAPTURE));
+                        list.insert(Move(square, square + knightMoves[moveType], MoveFlag::CAPTURE));
                     }
-                    else if (board.isWhitePieceAt(i + knightMoves[moveType]))
+                    else if (board.isWhitePieceAt(square + knightMoves[moveType]))
                     {
                         // don't push a move, there's another white piece there
                     }
                     // there's an empty square here, which is a quiet move
                     else
                     {
-                        list.insert(Move(i, i + knightMoves[moveType], MoveFlag::QUIET_MOVE));
+                        list.insert(Move(square, square + knightMoves[moveType], MoveFlag::QUIET_MOVE));
+                    }
+                }
+            }
+        }
+    }
+    // it is the black moveGen
+    else
+    {
+        while (copy.bitboard[knightBitboardIndex])
+        {
+            uint8_t square = copy.popBitboard(knightBitboardIndex);
+            for (int moveType = 0; moveType < 8; ++moveType)
+            {
+                // within the bounds
+                if (knightMap[moveType] & (1 << square))
+                {
+                    if (board.isWhitePieceAt(square + knightMoves[moveType]))
+                    {
+                        list.insert(Move(square, square + knightMoves[moveType], MoveFlag::CAPTURE));
+                    }
+                    else if (board.isBlackPieceAt(square + knightMoves[moveType]))
+                    {
+                        // don't push a move, there's another black piece there
+                    }
+                    // there's an empty square here, which is a quiet move
+                    else
+                    {
+                        list.insert(Move(square, square + knightMoves[moveType], MoveFlag::QUIET_MOVE));
                     }
                 }
             }
@@ -303,14 +330,76 @@ void knightGen(Board &board, MoveList list)
 // first one is the allowed area the move is allowed to perform, and the second is the move itself
 // in order it is: up, right, down, left, up & right, up & left, down & right, down & left
 std::array<uint64_t, 8> kingMap = {0xffffffffffffffull, 0x7f7f7f7f7f7f7f7full, 0xffffffffffffff00ull, 0xfefefefefefefefeull, 0x7f7f7f7f7f7f7full, 0xfefefefefefefeull, 0x7f7f7f7f7f7f7f00ull, 0xfefefefefefefe00ull};
-std::array<int8_t, 8> kingMove = {NORTH, EAST, SOUTH, WEST, NORTH + EAST, NORTH + WEST, SOUTH + EAST, SOUTH + WEST};
+std::array<int8_t, 8> kingMoves = {NORTH, EAST, SOUTH, WEST, NORTH + EAST, NORTH + WEST, SOUTH + EAST, SOUTH + WEST};
+
+void kingGen(Board &board, MoveList list)
+{
+    // index of the bitboard we want to access
+    uint8_t kingBitboardIndex = 10 + (board.isWhiteMove() ? 0 : 1);
+    // gets it manually, because thats (probably?) faster, and we are guaranteed to get a king, so there's no need to iterate like say a queen, which can be taken
+    uint8_t square = __builtin_ffsll(board.bitboard[kingBitboardIndex]) - 1;
+
+    if (board.isWhiteMove())
+    {
+        for (int moveType = 0; moveType < 8; ++moveType)
+        {
+            // within the bounds
+            if (kingMap[moveType] & (1 << square))
+            {
+                if (board.isBlackPieceAt(square + kingMoves[moveType]))
+                {
+                    list.insert(Move(square, square + kingMoves[moveType], MoveFlag::CAPTURE));
+                }
+                else if (board.isWhitePieceAt(square + kingMoves[moveType]))
+                {
+                    // don't push a move, there's another white piece there
+                }
+                // there's an empty square here, which is a quiet move
+                else
+                {
+                    list.insert(Move(square, square + kingMoves[moveType], MoveFlag::QUIET_MOVE));
+                }
+            }
+        }
+    }
+
+    // it is the black moveGen
+    else
+    {
+        for (int moveType = 0; moveType < 8; ++moveType)
+        {
+            // within the bounds
+            if (kingMap[moveType] & (1 << square))
+            {
+                if (board.isWhitePieceAt(square + kingMoves[moveType]))
+                {
+                    list.insert(Move(square, square + kingMoves[moveType], MoveFlag::CAPTURE));
+                }
+                else if (board.isBlackPieceAt(square + kingMoves[moveType]))
+                {
+                    // don't push a move, there's another black piece there
+                }
+                // there's an empty square here, which is a quiet move
+                else
+                {
+                    list.insert(Move(square, square + kingMoves[moveType], MoveFlag::QUIET_MOVE));
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Generates all possible castling moves, this logic is hardcoded
+ */
 
 MoveList moveGen(Board &board)
 {
     MoveList list;
 
-    pawnGen(board, list);
     knightGen(board, list);
+    pawnGen(board, list);
+    kingGen(board, list);
 
     return list;
 }

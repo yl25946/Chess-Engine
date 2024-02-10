@@ -138,6 +138,28 @@ bool Board::isWhiteMove() const
 {
     return moveAndCastle & (1 << 7);
 }
+
+/**
+ * Checks if there is a certain piece on the board, protably not needed but it's okay to code up anyways
+ */
+bool Board::containsPiece(uint8_t index) const
+{
+    return bitboard[index] != 0;
+}
+
+/**
+ * finds the next square of the piece
+ *
+ * MAKE SURE TO CHECK IF THERE'S A PIECE BEFOREHAND, OTHERWISE IT'LL RETURN SQUARE 0
+ */
+uint8_t Board::popBitboard(uint8_t index)
+{
+    uint8_t bit = __builtin_ffsll(bitboard[index]) - 1;
+    bitboard[index] &= bitboard[index] - 1;
+
+    return bit;
+}
+
 /**
  * Returns the fen representation of the board
  *

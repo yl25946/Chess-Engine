@@ -70,5 +70,7 @@ public:
     uint8_t pieceAt(uint8_t square) const;
     void push(Move m);
     bool isWhiteMove() const;
+    bool containsPiece(uint8_t index) const;
+    uint8_t popBitboard(uint8_t index);
     std::string fen() const;
 };
