@@ -34,7 +34,7 @@ Board::Board()
     moveCounter = 0;
     halfMoveCounter = 0;
     // no pawn move yet
-    enPassant = UINT8_MAX;
+    enPassant = 0;
     // everyone can castle, white move
     moveAndCastle = (1 << 7) + 15;
 }
@@ -76,9 +76,14 @@ bool Board::isInCheck() const
     return false;
 }
 
+bool Board::canEnPassant() const
+{
+    return enPassant & (1 << 7);
+}
+
 uint8_t Board::enPassantSquare() const
 {
-    return enPassantSquare();
+    return enPassant & 63;
 }
 
 /** Use this to check for captures*/

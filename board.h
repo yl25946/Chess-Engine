@@ -41,7 +41,8 @@ public:
     uint8_t halfMoveCounter;
 
     /**
-     * square where en-passant can happen, all 1s if otherwise
+     * first bit in the number represents if en passant can happen, 1 if true, 0 if false
+     *  next 7 bits is the location for en passant if applicable
      */
     uint8_t enPassant;
 
@@ -61,6 +62,7 @@ public:
     bool canBlackKingCastle() const;
     bool canBlackQueenCastle() const;
     bool isInCheck() const;
+    bool canEnPassant() const;
     uint8_t enPassantSquare() const;
     bool isBlackPieceAt(uint8_t square) const;
     bool isWhitePieceAt(uint8_t square) const;

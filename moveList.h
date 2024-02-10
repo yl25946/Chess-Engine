@@ -10,5 +10,5 @@ public:
     std::array<Move, 255> oversizedArray;
     uint8_t size = 0;
     MoveList();
-    inline void insert(Move m);
+    void insert(Move m);
 };

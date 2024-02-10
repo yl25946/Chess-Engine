@@ -4,7 +4,7 @@ MoveList::MoveList()
 {
 }
 
-inline void MoveList::insert(Move m)
+void MoveList::insert(Move m)
 {
     oversizedArray[size++] = m;
 }
