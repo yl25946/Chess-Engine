@@ -35,18 +35,18 @@ def search(board, turn, time):
     global nodes_evaluated
     nodes_evaluated = 0
     previousEval = -10000
-
+    null_move_cutoff = 100000
     # implements iterative deepening
     try:
         while (True):
             # if not in check, we can attempt null move
-            null_move_cutoff = 100000
             if (not board.is_check()):
                 null_board = copy.deepcopy(board)
                 null_board.push(chess.Move.null())
                 null_move_search = (
-                    null_board, turn ^ 1, max(1, depthCounter - 3), -100000, 100000, end_time)
+                    null_board, turn ^ 1, 1, -100000, 100000, end_time)
                 null_move_cutoff = null_move_search[1]
+                print(null_move_cutoff)
             last_completed_search = alpha_beta_negamax_search(
                 board, turn, depthCounter, -null_move_cutoff, -null_move_cutoff + 1, end_time)
             # if checkmate, then just play it, why the fuck are we searching more
