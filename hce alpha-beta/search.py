@@ -13,10 +13,9 @@ def search(board, turn, time):
 
     Uses iterative deepening
 
-    NOTE: will fuck up the original board, please make a copy
+    Implements null-move pruning
 
-    TODO: If searching with depth <= 1, errors out
-    TODO: find a way to not return None when time is too short
+    NOTE: will fuck up the original board, please make a copy
 
     LITERALLY JUST AN ABSTRACTION OF ALPHA_BETA_NEGAMAX
 
@@ -35,13 +34,21 @@ def search(board, turn, time):
     # resets the counter
     global nodes_evaluated
     nodes_evaluated = 0
-    board
+    previousEval = -10000
 
     # implements iterative deepening
     try:
         while (True):
+            # if not in check, we can attempt null move
+            null_move_cutoff = 100000
+            if (not board.is_check()):
+                null_board = copy.deepcopy(board)
+                null_board.push(chess.Move.null())
+                null_move_search = (
+                    null_board, turn ^ 1, max(1, depthCounter - 3), -100000, 100000, end_time)
+                null_move_cutoff = null_move_search[1]
             last_completed_search = alpha_beta_negamax_search(
-                board, turn, depthCounter, -100000, 100000, end_time)
+                board, turn, depthCounter, -null_move_cutoff, -null_move_cutoff + 1, end_time)
             # if checkmate, then just play it, why the fuck are we searching more
             if (last_completed_search[1] == 10000):
                 return last_completed_search
@@ -234,6 +241,6 @@ def quiesce_search(board, turn, alpha, beta, end_time):
 
 # pesto.init_tables()
 # board = chess.Board()
-# board.set_fen("r1b2r1k/p3b1pp/2p4N/2P4P/1PQ1n3/2P5/P1K2P2/RNB4q w - - 4 18")
+# board.set_fen("rn3rk1/1pq2p1p/p2p1bpB/3P4/P3Q3/2PB4/5PPP/2R1R1K1 b - - 0 1")
 # print(board)
-# print(search(board, chess.WHITE, 60))
+# print(search(board, chess.WHITE, 15))

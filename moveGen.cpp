@@ -67,7 +67,7 @@ void addPromotionMoves(MoveList list, uint8_t currSquare, uint8_t promotionSquar
 /**
  * Generates the pawn moves
  */
-void pawnGen(const Board &board, MoveList list)
+void pawnGen(const Board &board, MoveList &list)
 {
     // finds the proper place to get the pawns
     uint8_t pawnBitboardIndex = board.isWhiteMove() ? 0 : 1;
@@ -259,7 +259,7 @@ std::array<int8_t, 8> knightMoves = {NORTH + NORTH + EAST, NORTH + NORTH + WEST,
 /**
  * Generates all the knights
  */
-void knightGen(Board &board, MoveList list)
+void knightGen(Board &board, MoveList &list)
 {
     // index where we can access the correct bitboard
     uint64_t knightBitboardIndex = 2 + (board.isWhiteMove() ? 0 : 1);
@@ -332,7 +332,7 @@ void knightGen(Board &board, MoveList list)
 std::array<uint64_t, 8> kingMap = {0xffffffffffffffull, 0x7f7f7f7f7f7f7f7full, 0xffffffffffffff00ull, 0xfefefefefefefefeull, 0x7f7f7f7f7f7f7full, 0xfefefefefefefeull, 0x7f7f7f7f7f7f7f00ull, 0xfefefefefefefe00ull};
 std::array<int8_t, 8> kingMoves = {NORTH, EAST, SOUTH, WEST, NORTH + EAST, NORTH + WEST, SOUTH + EAST, SOUTH + WEST};
 
-void kingGen(Board &board, MoveList list)
+void kingGen(Board &board, MoveList &list)
 {
     // index of the bitboard we want to access
     uint8_t kingBitboardIndex = 10 + (board.isWhiteMove() ? 0 : 1);
@@ -390,16 +390,80 @@ void kingGen(Board &board, MoveList list)
 }
 
 /**
- * Generates all possible castling moves, this logic is hardcoded
+ * white kingside castle, white queenside castle, black queenside castle, black queenside castle
+ * If you map this on all pieces bitboard and it doesn't return 0, then you can't castle
  */
+std::array<uint64_t, 4> castleMap = {0x60ull, 0xeull, 0x6000000000000000ull, 0xe00000000000000ull};
+std::array<int8_t, 4> castleMoves = {EAST + EAST, WEST + WEST, EAST + EAST, WEST + WEST};
+std::array<uint8_t, 4> castleStartSquare = {
+    4,
+    4,
+    60,
+    60,
+};
+std::array<uint8_t, 4> castleEndSquare = {
+    6,
+    2,
+    62,
+    58,
+};
+std::array<MoveFlag, 4> castleMoveFlags = {MoveFlag::KINGSIDE_CASTLE, MoveFlag::QUEENSIDE_CASTLE, MoveFlag::KINGSIDE_CASTLE, MoveFlag::QUEENSIDE_CASTLE};
 
-MoveList moveGen(Board &board)
+/**
+ * Generates all the moves for castling
+ * DOES NOT CHECK IF THEY ARE IN CHECK, CASTLING THROUGH CHECK, OR CASTLING INTO CHECK
+ */
+void castleGen(Board &board, MoveList &list)
+{
+    uint64_t allPiecesBitboard = board.bitboard[12] | board.bitboard[13];
+    // if we have black then we go to different part of the array
+    uint8_t offset = board.isWhiteMove() ? 0 : 2;
+    std::array<bool, 4> castlePerms = {board.canWhiteKingCastle(), board.canWhiteQueenCastle(), board.canBlackKingCastle(), board.canBlackQueenCastle()};
+    for (int i = 0; i < 2; ++i)
+    {
+        if (castlePerms[i + offset] && (allPiecesBitboard & castleMap[i + offset] == 0))
+            list.insert(Move(castleStartSquare[i + offset], castleEndSquare[i + offset], castleMoveFlags[i = offset]));
+    }
+}
+
+/**
+ * Generate all the bishop moves
+ */
+void bishopGen(Board &board, MoveList &list)
+{
+}
+
+void rookGen(Board &board, MoveList &list)
+{
+}
+
+void queenGen(Board &board, MoveList &list)
+{
+}
+
+/**
+ * Generates all possible pseudolegal moves
+ *
+ * DOES NOT CHECK FOR PINS, MOVING INTO CHECK, AND CASTLING LOGIC
+ */
+MoveList &moveGen(Board &board)
 {
     MoveList list;
 
+    castleGen(board, list);
     knightGen(board, list);
     pawnGen(board, list);
     kingGen(board, list);
 
     return list;
+}
+
+/**
+ * Generates all pseudolegal capture moves
+ *
+ * ONLY NEED TO CHECK FOR PINS (?)
+ */
+MoveList &moveGen(Board &board)
+{
+    MoveList list;
 }
