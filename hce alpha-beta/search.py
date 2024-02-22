@@ -39,14 +39,6 @@ def search(board, turn, time):
     # implements iterative deepening
     try:
         while (True):
-            # # if not in check, we can attempt null move
-            # if (not board.is_check()):
-            #     null_board = copy.deepcopy(board)
-            #     null_board.push(chess.Move.null())
-            #     null_move_search = (
-            #         null_board, turn ^ 1, 1, -100000, 100000, end_time)
-            #     null_move_cutoff = null_move_search[1]
-            #     print(null_move_cutoff)
             last_completed_search = alpha_beta_negamax_search(
                 board, turn, depthCounter, -100000, 100000, end_time)
             # if checkmate, then just play it, why the fuck are we searching more
