@@ -132,6 +132,14 @@ void Board::push(Move m)
 
     // swaps it from white to black or black to white move
     moveAndCastle ^= (1 << 7);
+
+    // make sure you update the bitboard to make it easier to track captures
+    updateBitboard();
+}
+
+bool Board::isValidMove(Move m) const
+{
+    Board copy
 }
 
 bool Board::isWhiteMove() const

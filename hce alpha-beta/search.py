@@ -35,20 +35,20 @@ def search(board, turn, time):
     global nodes_evaluated
     nodes_evaluated = 0
     previousEval = -10000
-    null_move_cutoff = 100000
+    # null_move_cutoff = 100000
     # implements iterative deepening
     try:
         while (True):
-            # if not in check, we can attempt null move
-            if (not board.is_check()):
-                null_board = copy.deepcopy(board)
-                null_board.push(chess.Move.null())
-                null_move_search = (
-                    null_board, turn ^ 1, 1, -100000, 100000, end_time)
-                null_move_cutoff = null_move_search[1]
-                print(null_move_cutoff)
+            # # if not in check, we can attempt null move
+            # if (not board.is_check()):
+            #     null_board = copy.deepcopy(board)
+            #     null_board.push(chess.Move.null())
+            #     null_move_search = (
+            #         null_board, turn ^ 1, 1, -100000, 100000, end_time)
+            #     null_move_cutoff = null_move_search[1]
+            #     print(null_move_cutoff)
             last_completed_search = alpha_beta_negamax_search(
-                board, turn, depthCounter, -null_move_cutoff, -null_move_cutoff + 1, end_time)
+                board, turn, depthCounter, -100000, 100000, end_time)
             # if checkmate, then just play it, why the fuck are we searching more
             if (last_completed_search[1] == 10000):
                 return last_completed_search
@@ -93,11 +93,22 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
     # if we ever check for a move here we're FUCKED
 
     # return heuristic evaluation if the game hasn't ended
-    # TODO: ADD QUIESCE HERE
     if (depth == 0):
         # print(board.fen())
         # print(pesto.eval(board, turn))
         return None, quiesce_search(board, turn, alpha, beta, end_time)
+
+    # implements null move pruning
+    if depth >= 3 and not board.is_check():
+        null_board = copy.deepcopy(board)
+        null_board.push(chess.Move.null())
+        null_move_search = alpha_beta_negamax_search(
+            null_board, turn ^ 1, depth - 2, -beta, -beta + 1, end_time)
+        null_move_cutoff = null_move_search[1]
+        # prune if above cutoff
+        if null_move_cutoff >= beta:
+            return None, null_move_cutoff
+        print(null_move_cutoff)
 
     # start the search
     legal_moves = board.legal_moves
@@ -130,7 +141,7 @@ def quiesce_search(board, turn, alpha, beta, end_time):
 
     Parameters:
     board (chess.Board): the board position you want to perform the search on
-    alpha (int): worst you could do
+    alpha (int): worst you could do 
     beta (int): the best your opponent could do
     end_time (long): time we want to finish calculations by
 

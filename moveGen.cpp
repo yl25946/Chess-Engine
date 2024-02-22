@@ -33,6 +33,10 @@
 #define EAST 1
 #define WEST -1
 
+// defines the index to all the white/black pieces index in the bitboard
+#define ALL_WHITE_PIECES 12
+#define ALL_BLACK_PIECES 13
+
 /** row from 0 - 7 */
 inline uint8_t rank(uint8_t square)
 {
@@ -415,14 +419,14 @@ std::array<MoveFlag, 4> castleMoveFlags = {MoveFlag::KINGSIDE_CASTLE, MoveFlag::
  */
 void castleGen(Board &board, MoveList &list)
 {
-    uint64_t allPiecesBitboard = board.bitboard[12] | board.bitboard[13];
+    uint64_t allPiecesBitboard = board.bitboard[ALL_WHITE_PIECES] | board.bitboard[ALL_BLACK_PIECES];
     // if we have black then we go to different part of the array
     uint8_t offset = board.isWhiteMove() ? 0 : 2;
     std::array<bool, 4> castlePerms = {board.canWhiteKingCastle(), board.canWhiteQueenCastle(), board.canBlackKingCastle(), board.canBlackQueenCastle()};
     for (int i = 0; i < 2; ++i)
     {
         if (castlePerms[i + offset] && (allPiecesBitboard & castleMap[i + offset] == 0))
-            list.insert(Move(castleStartSquare[i + offset], castleEndSquare[i + offset], castleMoveFlags[i = offset]));
+            list.insert(Move(castleStartSquare[i + offset], castleEndSquare[i + offset], castleMoveFlags[i + offset]));
     }
 }
 
@@ -433,10 +437,39 @@ void bishopGen(Board &board, MoveList &list)
 {
 }
 
+/**
+ * Generates all the rook moves
+ */
 void rookGen(Board &board, MoveList &list)
 {
+    // index where we can access the correct bitboard
+    uint64_t rookBitboardIndex = 6 + (board.isWhiteMove() ? 0 : 1);
+
+    Board copy = board;
+
+    // literally iterates until it hits a black/white piece, then stops
+    if (board.isWhiteMove())
+    {
+        while (copy.bitboard[rookBitboardIndex])
+        {
+            uint8_t square = copy.popBitboard(rookBitboardIndex);
+        }
+    }
+    // it is the black moveGen
+    else
+    {
+        while (copy.bitboard[rookBitboardIndex])
+        {
+            uint8_t square = copy.popBitboard(rookBitboardIndex);
+        }
+    }
 }
 
+/**
+ * Generates all the queen moves
+ *
+ * NOTE: it's just mashed together rook and bishop
+ */
 void queenGen(Board &board, MoveList &list)
 {
 }
@@ -451,6 +484,9 @@ MoveList &moveGen(Board &board)
     MoveList list;
 
     castleGen(board, list);
+    queenGen(board, list);
+    rookGen(board, list);
+    bishopGen(board, list);
     knightGen(board, list);
     pawnGen(board, list);
     kingGen(board, list);
