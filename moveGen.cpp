@@ -474,11 +474,6 @@ void queenGen(Board &board, MoveList &list)
 {
 }
 
-/**
- * Generates all possible pseudolegal moves
- *
- * DOES NOT CHECK FOR PINS, MOVING INTO CHECK, AND CASTLING LOGIC
- */
 MoveList &moveGen(Board &board)
 {
     MoveList list;
@@ -494,12 +489,7 @@ MoveList &moveGen(Board &board)
     return list;
 }
 
-/**
- * Generates all pseudolegal capture moves
- *
- * ONLY NEED TO CHECK FOR PINS (?)
- */
-MoveList &moveGen(Board &board)
+MoveList &captureMoveGen(Board &board)
 {
     MoveList list;
 }
