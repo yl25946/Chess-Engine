@@ -71,12 +71,12 @@ void addPromotionMoves(MoveList list, uint8_t currSquare, uint8_t promotionSquar
 /**
  * Generates the pawn moves
  */
-void pawnGen(const Board &board, MoveList &list)
+void pawnGen(const BoardState &board, MoveList &list)
 {
     // finds the proper place to get the pawns
     uint8_t pawnBitboardIndex = board.isWhiteMove() ? 0 : 1;
 
-    Board copy = board;
+    BoardState copy = board;
     // if it's black, just rotate the board using byteswap and normally gen pawnMove
 
     // check for en passant
@@ -263,12 +263,12 @@ std::array<int8_t, 8> knightMoves = {NORTH + NORTH + EAST, NORTH + NORTH + WEST,
 /**
  * Generates all the knights
  */
-void knightGen(Board &board, MoveList &list)
+void knightGen(const BoardState &board, MoveList &list)
 {
     // index where we can access the correct bitboard
     uint64_t knightBitboardIndex = 2 + (board.isWhiteMove() ? 0 : 1);
 
-    Board copy = board;
+    BoardState copy = board;
 
     // case for the middle 6x6, the knight can freely move
     // have two for optimization?
@@ -336,7 +336,7 @@ void knightGen(Board &board, MoveList &list)
 std::array<uint64_t, 8> kingMap = {0xffffffffffffffull, 0x7f7f7f7f7f7f7f7full, 0xffffffffffffff00ull, 0xfefefefefefefefeull, 0x7f7f7f7f7f7f7full, 0xfefefefefefefeull, 0x7f7f7f7f7f7f7f00ull, 0xfefefefefefefe00ull};
 std::array<int8_t, 8> kingMoves = {NORTH, EAST, SOUTH, WEST, NORTH + EAST, NORTH + WEST, SOUTH + EAST, SOUTH + WEST};
 
-void kingGen(Board &board, MoveList &list)
+void kingGen(const BoardState &board, MoveList &list)
 {
     // index of the bitboard we want to access
     uint8_t kingBitboardIndex = 10 + (board.isWhiteMove() ? 0 : 1);
@@ -417,7 +417,7 @@ std::array<MoveFlag, 4> castleMoveFlags = {MoveFlag::KINGSIDE_CASTLE, MoveFlag::
  * Generates all the moves for castling
  * DOES NOT CHECK IF THEY ARE IN CHECK, CASTLING THROUGH CHECK, OR CASTLING INTO CHECK
  */
-void castleGen(Board &board, MoveList &list)
+void castleGen(const BoardState &board, MoveList &list)
 {
     uint64_t allPiecesBitboard = board.bitboard[ALL_WHITE_PIECES] | board.bitboard[ALL_BLACK_PIECES];
     // if we have black then we go to different part of the array
@@ -433,19 +433,19 @@ void castleGen(Board &board, MoveList &list)
 /**
  * Generate all the bishop moves
  */
-void bishopGen(Board &board, MoveList &list)
+void bishopGen(const BoardState &board, MoveList &list)
 {
 }
 
 /**
  * Generates all the rook moves
  */
-void rookGen(Board &board, MoveList &list)
+void rookGen(const BoardState &board, MoveList &list)
 {
     // index where we can access the correct bitboard
     uint64_t rookBitboardIndex = 6 + (board.isWhiteMove() ? 0 : 1);
 
-    Board copy = board;
+    BoardState copy = board;
 
     // literally iterates until it hits a black/white piece, then stops
     if (board.isWhiteMove())
@@ -470,11 +470,11 @@ void rookGen(Board &board, MoveList &list)
  *
  * NOTE: it's just mashed together rook and bishop
  */
-void queenGen(Board &board, MoveList &list)
+void queenGen(BoardState &board, MoveList &list)
 {
 }
 
-MoveList &moveGen(Board &board)
+void moveGen(BoardState &board, MoveList &m)
 {
     MoveList list;
 
@@ -485,11 +485,8 @@ MoveList &moveGen(Board &board)
     knightGen(board, list);
     pawnGen(board, list);
     kingGen(board, list);
-
-    return list;
 }
 
-MoveList &captureMoveGen(Board &board)
+void captureMoveGen(BoardState &board, MoveList &m)
 {
-    MoveList list;
 }

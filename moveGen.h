@@ -1,15 +1,15 @@
 #pragma once
 
 #include "move.h"
-#include "board.h"
+#include "boardState.h"
 #include "moveList.h"
 
 /**
  * Generates pseudo-legal moves (does not consider pins, checks, or castling rights, or moving into check)
  */
-MoveList &moveGen(Board &board);
+void moveGen(BoardState &board, MoveList &m);
 
 /**
  * Generates pseudo-legal moves (only need to consider checks & pins?)
  */
-MoveList &captureMoveGen(Board &board);
+void captureMoveGen(BoardState &board, MoveList &m);

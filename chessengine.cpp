@@ -2,7 +2,7 @@
 // #include <vector>
 
 #include "moveGen.h"
-#include "board.h"
+#include "boardState.h"
 
 // the board is going to be represented using 12 64 bit unsigned ints, with each bit representing a square
 // making memory storage much more efficient
@@ -13,7 +13,7 @@
 
 int main()
 {
-    Board board;
+    // Board board;
     // Move move(0, 0, 0);
     return 0;
 }

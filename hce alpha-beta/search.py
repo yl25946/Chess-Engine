@@ -100,7 +100,7 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
         # prune if above cutoff
         if null_move_cutoff >= beta:
             return None, null_move_cutoff
-        print(null_move_cutoff)
+        # print(null_move_cutoff)
 
     # start the search
     legal_moves = board.legal_moves
