@@ -96,7 +96,7 @@ def alpha_beta_negamax_search(board, turn, depth, alpha, beta, end_time):
         null_board.push(chess.Move.null())
         null_move_search = alpha_beta_negamax_search(
             null_board, turn ^ 1, depth - 2, -beta, -beta + 1, end_time)
-        null_move_cutoff = null_move_search[1]
+        null_move_cutoff = -null_move_search[1]
         # prune if above cutoff
         if null_move_cutoff >= beta:
             return None, null_move_cutoff
