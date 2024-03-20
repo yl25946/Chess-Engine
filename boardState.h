@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "move.h"
+#include "zobrist.h"
 class BoardState
 {
 public:
@@ -54,6 +55,12 @@ public:
      * 0000
      */
     uint8_t moveAndCastle;
+
+    /**
+     * Hash key using Zobrist Hashing
+     */
+    uint64_t key;
+
     BoardState();
     void updateBitboard();
     // Board &deepCopy() const;
@@ -71,7 +78,7 @@ public:
     bool isWhiteMove() const;
     bool containsPiece(uint8_t index) const;
     void push(Move m);
-    bool isValidMove(Move m) const;
+    bool isValidBoardState() const;
     uint8_t popBitboard(uint8_t index);
     std::string fen() const;
 };

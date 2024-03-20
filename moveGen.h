@@ -13,3 +13,8 @@ void moveGen(BoardState &board, MoveList &m);
  * Generates pseudo-legal moves (only need to consider checks & pins?)
  */
 void captureMoveGen(BoardState &board, MoveList &m);
+
+/**
+ * Generates the magic bitboards for sliding pieces
+ */
+void generateMagicBitboards();

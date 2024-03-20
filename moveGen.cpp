@@ -438,7 +438,7 @@ void bishopGen(const BoardState &board, MoveList &list)
 }
 
 /**
- * Generates all the rook moves
+ * Generates all the rook moves, uses magic bitboards
  */
 void rookGen(const BoardState &board, MoveList &list)
 {
@@ -453,6 +453,8 @@ void rookGen(const BoardState &board, MoveList &list)
         while (copy.bitboard[rookBitboardIndex])
         {
             uint8_t square = copy.popBitboard(rookBitboardIndex);
+            uint8_t rankNum = rank(square);
+            uint8_t fileNum = file(square);
         }
     }
     // it is the black moveGen

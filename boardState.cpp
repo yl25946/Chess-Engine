@@ -37,6 +37,8 @@ BoardState::BoardState()
     enPassant = 0;
     // everyone can castle, white move
     moveAndCastle = (1 << 7) + 15;
+
+    updateBitboard();
 }
 
 void BoardState::updateBitboard()
@@ -46,6 +48,8 @@ void BoardState::updateBitboard()
 
     for (int i = 1; i < 12; i += 2)
         bitboard[13] |= bitboard[i];
+
+    this->key = hash(*this);
 }
 
 /**
@@ -137,7 +141,7 @@ void BoardState::push(Move m)
     updateBitboard();
 }
 
-bool BoardState::isValidMove(Move m) const
+bool BoardState::isValidBoardState() const
 {
     BoardState copy;
 }
