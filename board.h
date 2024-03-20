@@ -1,3 +1,6 @@
+#ifndef SPAGHET_BOARD_H
+#define SPAGHET_BOARD_H
+
 #include "boardState.h"
 #include <stack>
 #include <vector>
@@ -15,3 +18,5 @@ public:
     void push(BoardState boardState);
     void pop();
 };
+
+#endif

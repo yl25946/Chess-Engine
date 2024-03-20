@@ -1,5 +1,9 @@
 #include "zobrist.h"
 
-uint64_t hash(BoardState &board)
+void hash(BoardState &board)
+{
+}
+
+void quickHash(BoardState &currBoard, BoardState &nextBoard)
 {
 }

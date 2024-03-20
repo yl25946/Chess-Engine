@@ -49,7 +49,7 @@ void BoardState::updateBitboard()
     for (int i = 1; i < 12; i += 2)
         bitboard[13] |= bitboard[i];
 
-    this->key = hash(*this);
+    hash(*this);
 }
 
 /**

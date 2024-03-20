@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SPAGHET_MOVE_LIST_H
+#define SPAGHET_MOVE_LIST_H
 
 #include <array>
 
@@ -12,3 +13,5 @@ public:
     MoveList();
     void insert(Move m);
 };
+
+#endif

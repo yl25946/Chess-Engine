@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SPAGHET_BOARD_STATE_H
+#define SPAGHET_BOARD_STATE_H
 
 #include <vector>
 #include <string>
@@ -82,3 +83,5 @@ public:
     uint8_t popBitboard(uint8_t index);
     std::string fen() const;
 };
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SPAGHET_MOVE_GEN_H
+#define SPAGHET_MOVE_GEN_H
 
 #include "move.h"
 #include "boardState.h"
@@ -18,3 +19,5 @@ void captureMoveGen(BoardState &board, MoveList &m);
  * Generates the magic bitboards for sliding pieces
  */
 void generateMagicBitboards();
+
+#endif
