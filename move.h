@@ -1,5 +1,4 @@
-#ifndef SPAGHET_MOVE_H
-#define SPAGHET_MOVE_H
+#pragma once
 
 #include <climits>
 #include <stdint.h>
@@ -33,5 +32,3 @@ public:
     uint8_t to() const;
     uint8_t flag() const;
 };
-
-#endif

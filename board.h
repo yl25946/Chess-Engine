@@ -1,5 +1,4 @@
-#ifndef SPAGHET_BOARD_H
-#define SPAGHET_BOARD_H
+#pragma once
 
 #include "boardState.h"
 #include <stack>
@@ -18,5 +17,3 @@ public:
     void push(BoardState boardState);
     void pop();
 };
-
-#endif

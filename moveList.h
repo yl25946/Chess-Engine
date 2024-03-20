@@ -1,6 +1,3 @@
-#ifndef SPAGHET_MOVE_LIST_H
-#define SPAGHET_MOVE_LIST_H
-
 #include <array>
 
 #include "move.h"
@@ -13,5 +10,3 @@ public:
     MoveList();
     void insert(Move m);
 };
-
-#endif
