@@ -2,3 +2,7 @@
 /legacy/CCRL Dataset
 /CCRL Dataset
 *.exe
+
+# NNUE training files
+*.bin
+*.binpack
