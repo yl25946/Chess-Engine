@@ -146,6 +146,9 @@ bool BoardState::isValidBoardState() const
     BoardState copy;
 }
 
+/**
+ * Based on who can play the next move
+ */
 bool BoardState::isWhiteMove() const
 {
     return moveAndCastle & (1 << 7);
