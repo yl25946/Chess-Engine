@@ -1,0 +1,7 @@
+engine: 
+	g++ chessEngine.cpp -o chessEngine
+	./chessEngine
+
+perft: 
+	g++ perft.cpp -o perft
+	./perft
